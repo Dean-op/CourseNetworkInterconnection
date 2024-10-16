@@ -1,0 +1,37 @@
+﻿三层交换机（O）
+Switch>en
+Switch#vl da
+Switch(vlan)#vl 2
+Switch(vlan)#vl 3
+Switch(vlan)#vl 4
+Switch(vlan)#exit
+Switch#conf t
+Switch(config)#in ra f0/1-2
+Switch(config-if-range)#sw mo ac
+Switch(config-if-range)#sw ac vl 2
+Switch(config-if-range)#exit
+Switch(config)#in ra f0/3-4
+Switch(config-if-range)#sw mo ac
+Switch(config-if-range)#sw ac vl 3
+Switch(config-if-range)#exit
+Switch(config)#in ra f0/5-6
+Switch(config-if-range)#sw mo ac
+Switch(config-if-range)#sw ac vl 4
+Switch(config-if-range)#end
+Switch#sh vl
+
+Switch#conf t
+Switch(config)#in vl 2
+Switch(config-if)#ip ad 192.168.1.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#in vl 3
+Switch(config-if)#ip ad 192.168.2.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#in vl 4
+Switch(config-if)#ip ad 192.168.3.254 255.255.255.0
+Switch(config-if)#end
+Switch#sh ip ro
+Switch#conf t
+Switch(config)#ip routing
+Switch(config)#end
+Switch#sh ip ro

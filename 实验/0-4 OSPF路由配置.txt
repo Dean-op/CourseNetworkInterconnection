@@ -1,0 +1,86 @@
+
+命令行接口配置过程： 
+PC1
+IP: 192.168.1.2
+Submask: 255.255.255.0
+Gateway: 192.168.1.1
+
+PC2
+IP: 192.168.4.2
+Submask: 255.255.255.0
+Gateway: 192.168.4.1
+
+R1 IP配置
+1.	Router>en 
+2.	Router#conf t
+3.	Router(config)ho  R1-nuoya  //修改路由器名字与姓名关联
+4.	Router(config)#in f 0/0
+5.	Router(config-if)#ip ad 192.168.1.1 255.255.255.0
+6.	Router(config-if)#no sh 
+7.	Router(config-if)#exit
+8.	Router(config)#in f0/1
+9.	Router(config-if)#ip ad 192.168.2.1 255.255.255.0
+10.	Router(config-if)#no sh 
+11.	Router(config-if)#end
+12.	Router#sh ru  //查看IP配置
+
+R2 IP配置
+1.	Router>en 
+2.	Router#conf t
+3.	Router(config)ho  R2-nuoya  //修改路由器名字与姓名关联
+4.	Router(config)#in f0/0
+5.	Router(config-if)#ip ad 192.168.2.2 255.255.255.0
+6.	Router(config-if)#no sh 
+7.	Router(config-if)#exit
+8.	Router(config)#in f0/1
+9.	Router(config-if)#ip address 192.168.3.1 255.255.255.0
+10.	Router(config-if)#no sh 
+11.	Router(config-if)#end
+12.	Router#sh ru  //查看IP配置
+
+R3 IP配置
+1.	Router#en
+2.	Router#conf t
+3.	Router(config)ho  R3-nuoya  //修改路由器名字与学号尾数关联
+4.	Router(config)#in f0/0
+5.	Router(config-if)#ip ad 192.168.3.2 255.255.255.0
+6.	Router(config-if)# no sh 
+7.	Router(config-if)#exit
+8.	Router(config)#in f0/1
+9.	Router(config-if)#ip ad 192.168.4.1 255.255.255.0
+10.	Router(config-if)#no sh 
+11.	Router(config-if)#end
+12.	Router#sh ru  //查看IP配置
+
+R1 路由配置
+1.	Router#ip routing //开启路由功能
+2.	Router(config)#router ospf 100 
+3.	Router(config-router)#network 192.168.1.0 0.0.0.255 area 1
+4.	Router(config-router)#network 192.168.2.0 0.0.0.255 area 0
+5.	Router(config-router)#end
+6.	Router#sh ip ro
+7.	Router#wr
+
+R2 路由配置
+1.	Router#ip routing //开启路由功能
+2.	Router(config)#router ospf 100 
+3.	Router(config-router)#network 192.168.2.0 0.0.0.255 area 0
+4.	Router(config-router)#network 192.168.3.0 0.0.0.255 area 0
+5.	Router(config-router)#end
+6.	Router#sh ip ro
+7.	Router#wr
+
+R3 路由配置
+1.	Router#ip routing //开启路由功能
+2.	Router(config)#router ospf 100 
+3.	Router(config-router)#network 192.168.3.0 0.0.0.255 area 0
+4.	Router(config-router)#network 193.168.4.0 0.0.0.255 area 2
+5.	Router(config-router)#end
+6.	Router#sh ip ro
+7.	Router#wr
+实验验证
+PC1 Ping PC2  
+Ping 192.168.4.2      reply
+
+
+

@@ -1,0 +1,132 @@
+S1配置：
+
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#vl 2
+Switch(config-vlan)#vl 3
+Switch(config-vlan)#vl 4
+
+Switch(config-vlan)#in r f0/1-2
+Switch(config-if-range)#sw ac vl 2
+Switch(config-if-range)#exit
+Switch(config)#in r f0/3-4
+Switch(config-if-range)#sw ac vl 3
+Switch(config-if-range)#end
+Switch#
+Switch#sh vl
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+2    VLAN0002                         active    Fa0/1, Fa0/2
+3    VLAN0003                         active    Fa0/3, Fa0/4
+Switch#sh vl
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+2    VLAN0002                         active    Fa0/1, Fa0/2
+3    VLAN0003                         active    Fa0/3, Fa0/4
+Switch#sh vl
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+2    VLAN0002                         active    Fa0/1, Fa0/2
+3    VLAN0003                         active    Fa0/3, Fa0/4
+
+witch#
+witch#conf t
+Switch(config)#in f0/5
+Switch(config-if)#sw tr en dot1q
+Switch(config-if)#sw mo tr
+Switch(config-if)#sw tr al vl 2,3,4
+Switch(config-if)#exit
+
+Switch(config)#in vl 2
+Switch(config-if)#ip ad 192.168.1.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#in vl 4
+Switch(config-if)#ip ad 192.168.3.1 255.255.255.0
+Switch(config-if)#exit
+
+Switch(config)#ip routing
+Switch(config)#ip route 192.168.2.0 255.255.255.0 192.168.3.2
+Switch(config)#exit
+Switch#sh ip ro
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+C    192.168.1.0/24 is directly connected, Vlan2
+S    192.168.2.0/24 [1/0] via 192.168.3.2
+C    192.168.3.0/24 is directly connected, Vlan4
+Switch#
+
+S2配置：
+Switch>en
+Switch#conf t
+Switch(config)#vl 2
+Switch(config-vlan)#vl 3
+Switch(config-vlan)#vl 4
+Switch(config-vlan)#exit
+
+Switch(config)#in r f0/1-2
+Switch(config-if-range)#sw ac vl 2
+Switch(config-if-range)#exit
+Switch(config)#in r f0/3-4
+Switch(config-if-range)#sw ac vl 3
+Switch(config-if-range)#exit
+
+Switch(config)#in f0/5
+Switch(config-if)#sw tr en dot1q //dot之后1是一不是L
+Switch(config-if)#sw mo tr
+Switch(config-if)#sw tr al vl 2,3,4
+Switch(config-if)#exit
+
+Switch(config)#in vl 3
+Switch(config-if)#ip ad 192.168.2.254 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#in vl 4
+Switch(config-if)#ip ad 192.168.3.2 255.255.255.0
+Switch(config-if)#exit
+Switch(config)#ip routing
+Switch(config)#ip route 192.168.1.0 255.255.255.0 192.168.3.1
+Switch(config)#exit
+Switch#sh ip ro
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+S    192.168.1.0/24 [1/0] via 192.168.3.1
+C    192.168.2.0/24 is directly connected, Vlan3
+C    192.168.3.0/24 is directly connected, Vlan4
+Switch#

@@ -1,0 +1,50 @@
+ 单臂路由实验配置
+PC1
+IP: 192.168.1.2 
+Submask: 255.255.255.0 
+Gageway:192.168.1.1
+
+PC2
+IP: 192.168.2.2 
+Submask: 255.255.255.0 
+Gageway:192.168.2.1
+
+Switch1
+1.	Switch>en
+2.	Switch#conf t
+3.	Switch(config)#vl 10
+4.	Switch(config-vlan)#exit
+5.	Switch(config)#vl 20
+6.	Switch(config-vlan)exit
+7.	Switch(config)in f0/1
+8.	Switch(config-if)sw ac vl 10  //加入vl 10 
+9.	Switch(config-if)exit
+10.	Switch(config)in  f0/2  //进入交换机0模块第2端口
+11.	Switch(config-if)sw ac vl 20  //加入vl 20
+12.	Switch(config-if)endSwitch#sh vl
+13.	Switch#conf t
+14.	Switch(config)in f0/3    //进入交换机0模块第3端口
+15.	Switch(config-if)sw mo tr 	//设置端口的工作模式为trunk
+16.	Switch(config-if)end
+17.	Switch# sh ru
+
+
+Router0
+1.	Router>en
+2.	Router#conf t
+3.	Router(config)#in f0/0  //进入路由器0模块第0端口
+4.	Router(config-if)#no sh  //开启该端口(此时路由连接交换机的端口 从block转到forward)
+5.	Router(config-if)#exit	
+6.	Router(config)#in f 0/0.1  //进入路由器0模块第0端口第1子接口
+7.	Router(config-subif)#encapsulation dot1Q 10  //封装协议设置为dot1q 允许通过的vlan 为10
+8.	Router(config-subif)#ip ad 192.168.1.1 255.255.255.0  //该子接口配置IP地址为192.168.1.1
+9.	Router(config-subif)#exit	
+10.	Router(config)#in f0/0.2    //进入路由器0模块第0端口第2子接口
+11.	Router(config-subif)#encapsulation dot1q 20//封装协议设置为dot1q 允许通过的vlan 为20
+12.	Router(config-subif)#ip ad 192.168.2.1 255.255.255.0 //该子接口配置IP地址为192.168.2.1
+13.	Router(config-subif)#end
+14.	Router#sh ip ro
+
+PC1 Ping PC2         
+Ping 192.168.2.2   reply
+?

@@ -1,0 +1,125 @@
+S1配置
+
+Switch>en
+Switch#conf t
+S1(config)ho S1  //交换机更名
+
+S1(config)#vl 2  //创建VLAN
+S1(config-vlan)#vl 3
+S1(config-vlan)#vl 6
+S1(config-vlan)#exit
+
+S1(config)#in r f0/1-2  //将接口加入VLAN
+S1(config-if-range)#sw ac vl 2
+S1(config-if-range)#exit
+S1(config)#in r f0/3-4
+S1(config-if-range)#sw ac vl 3
+S1(config-if-range)#exit
+S1(config)#in f0/5
+S1(config-if)#sw ac vl 6
+S1(config-if)#end
+S1#sh vl
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/11, Fa0/12, Fa0/13
+                                                Fa0/14, Fa0/15, Fa0/16, Fa0/17
+                                                Fa0/18, Fa0/19, Fa0/20, Fa0/21
+                                                Fa0/22, Fa0/23, Fa0/24, Gig0/1
+                                                Gig0/2
+2    VLAN0002                         active    Fa0/1, Fa0/2
+3    VLAN0003                         active    Fa0/3, Fa0/4
+6    VLAN0006                         active    Fa0/5
+
+S1(config)#in vl 2    //给IP接口配置IP地址和子网掩码
+S1(config-if)#ip ad 192.168.1.254 255.255.255.0
+S1(config-if)#exit
+S1(config)#in vl 3
+S1(config-if)#ip ad 192.168.2.254 255.255.255.0
+S1(config-if)#exit
+S1(config)#in vl 6
+S1(config-if)#ip ad 192.168.5.1 255.255.255.0
+S1(config-if)#exit
+
+S1(config)#ip routing  //启动三层交换机的路由功能
+S1(config)#router rip  //RIP配置
+S1(config-router)#network 192.168.1.0
+S1(config-router)#network 192.168.2.0
+S1(config-router)#network 192.168.5.0
+S1(config-router)#end
+S1#sh ip ro  //查看路由配置表
+
+C    192.168.1.0/24 is directly connected, Vlan2
+C    192.168.2.0/24 is directly connected, Vlan3
+R    192.168.3.0/24 [120/1] via 192.168.5.2, 00:00:21, Vlan6
+R    192.168.4.0/24 [120/1] via 192.168.5.2, 00:00:21, Vlan6
+C    192.168.5.0/24 is directly connected, Vlan6
+S1#wr
+Building configuration...
+[OK]
+
+S2配置
+Switch>en
+Switch#conf t
+Switch(config)#ho S2
+
+S2(config)#vl 4
+S2(config-vlan)#vl 5
+S2(config-vlan)#vl 6
+S2(config-vlan)#exit
+
+S2(config)#in r f0/1-2
+S2(config-if-range)#sw ac vl 4
+S2(config-if-range)#exit
+S2(config)#in r f0/3-4
+S2(config-if-range)#sw ac vl 5
+S2(config-if-range)#exit
+S2(config)#in f0/5
+S2(config-if)#sw ac vl 6
+S2(config-if)#end
+
+S2#sh vl
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/11, Fa0/12, Fa0/13
+                                                Fa0/14, Fa0/15, Fa0/16, Fa0/17
+                                                Fa0/18, Fa0/19, Fa0/20, Fa0/21
+                                                Fa0/22, Fa0/23, Fa0/24, Gig0/1
+                                                Gig0/2
+4    VLAN0004                         active    Fa0/1, Fa0/2
+5    VLAN0005                         active    Fa0/3, Fa0/4
+6    VLAN0006                         active    Fa0/5
+
+------------------------------------------------------------------------------
+
+S2#conf t
+S2(config)#in vl 4
+S2(config-if)#ip ad 192.168.3.254 255.255.255.0
+S2(config-if)#exit
+S2(config)#in vl 5
+S2(config-if)#ip ad 192.168.4.254 255.255.255.0
+S2(config-if)#exit
+S2(config)#in vl 6
+S2(config-if)#ip ad 192.168.5.2 255.255.255.0
+S2(config-if)#exit
+
+S2(config)#ip routing
+S2(config)#router rip
+S2(config-router)#network 192.168.3.0
+S2(config-router)#network 192.168.4.0
+S2(config-router)#network 192.168.5.0
+S2(config)#end
+
+S2#sh ip ro
+
+R    192.168.1.0/24 [120/1] via 192.168.5.1, 00:00:10, Vlan6
+R    192.168.2.0/24 [120/1] via 192.168.5.1, 00:00:10, Vlan6
+C    192.168.3.0/24 is directly connected, Vlan4
+C    192.168.4.0/24 is directly connected, Vlan5
+C    192.168.5.0/24 is directly connected, Vlan6
+
+S2#wr
+Building configuration...
+[OK]
