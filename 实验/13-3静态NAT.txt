@@ -1,0 +1,80 @@
+静态NAT
+
+步骤一 配置设备的接口IP地址
+
+（1）R1接口IP地址
+Router>
+Router>en
+Router#conf t
+Router(config)#ho R1
+R1(config)#in f0/0
+R1(config-if)#ip ad 192.168.1.254 255.255.255.0
+R1(config-if)#no sh
+
+R1(config-if)#in f0/1
+R1(config-if)#ip ad 10.1.1.1 255.255.255.0
+R1(config-if)#no sh
+R1(config-if)#end
+R1#sh ru
+
+（2）R2接口IP地址
+Router>
+Router>en
+Router#conf t
+Router(config)#ho R2
+R2(config)#in f0/0
+R2(config-if)#ip ad 10.1.1.2 255.255.255.0
+R2(config-if)#no sh
+R2(config-if)#exit
+
+R2(config)#in f0/1
+R2(config-if)#ip ad 100.1.1.1 255.255.255.0
+R2(config-if)#no sh
+R2(config-if)#end
+R2#sh ru
+
+
+步骤二 配置设备的路由
+（1）配置R1的默认路由
+
+R1#conf t
+R1(config)#ip route 0.0.0.0 0.0.0.0 10.1.1.2
+R1(config)#end
+R1#sh ip ro
+（2）查看R2的默认路由
+R2#sh ip ro
+（3）验证PC1和Server0的连通性
+PC>ping 100.1.1.2    //不通
+（4）验证PC2和Server0的连通性
+PC>ping 100.1.1.2   //不通
+
+说明：计算机PC1和PC2无法与Server0通信。
+原因是数据包从PC0（PC1）发出后，经过路
+由器R1的路由转发到达路由器R2，路由器R2将
+其送到直连的Server0上，应答的数据包从Server0
+到达路由器R2后，因为没有到达目的网络192.168.1.0
+的路由表项，故而将其丢弃。
+
+步骤三在路由器R1上 配置静态NAT
+（1）设置内部转换接口
+R1#conf t
+R1(config)#in f0/0
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+（2）设置外部转换接口
+R1(config)#in f0/1
+R1(config-if)#ip nat outside
+R1(config-if)#exit
+（3)应用NAT
+R1(config)#ip nat inside source static 192.168.1.1 10.1.1.10
+R1(config)#ip nat inside source static 192.168.1.2 10.1.1.20
+（4)应用验证PC1和Server0的连通性
+PC>ping 100.1.1.2    //通
+（5）查看R1上的NAT转化结果
+R1(config)#end
+R1#sh ip nat translations 
+R1(config)#end
+R1#sh ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+---  10.1.1.10             192.168.1.1        ---                        ---
+---  10.1.1.20             192.168.1.2        ---                         ---

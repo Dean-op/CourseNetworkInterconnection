@@ -1,0 +1,118 @@
+动态NAT
+
+步骤一 配置设备的接口IP地址
+
+（1）R1接口IP地址
+Router>
+Router>en
+Router#conf t
+Router(config)#ho R1
+R1(config)#in f0/0
+R1(config-if)#ip ad 192.168.1.254 255.255.255.0
+R1(config-if)#no sh
+
+R1(config-if)#in f0/1
+R1(config-if)#ip ad 10.1.1.1 255.255.255.0
+R1(config-if)#no sh
+R1(config-if)#end
+R1#sh ru
+
+（2）R2接口IP地址
+Router>
+Router>en
+Router#conf t
+Router(config)#ho R2
+R2(config)#in f0/0
+R2(config-if)#ip ad 10.1.1.2 255.255.255.0
+R2(config-if)#no sh
+R2(config-if)#exit
+
+R2(config)#in f0/1
+R2(config-if)#ip ad 100.1.1.1 255.255.255.0
+R2(config-if)#no sh
+R2(config-if)#end
+R2#sh ru
+
+
+步骤二 配置设备的路由
+（1）配置R1的默认路由
+R1>en
+R1#conf t
+R1(config)#ip route 0.0.0.0 0.0.0.0 10.1.1.2
+R1(config)#end
+R1#sh ip ro
+（2）查看R1的路由信息
+R1#sh ip ro
+（3）查看R2的路由信息
+R2#sh ip ro
+（4）验证PC1和Server0的连通性
+PC>ping 100.1.1.2    //不通
+（5）验证PC2和Server0的连通性
+PC>ping 100.1.1.2   //不通
+
+说明：计算机PC1和PC2无法与Server0通信。
+原因是数据包从PC0（PC1）发出后，经过路
+由器R1的路由转发到达路由器R2路由器R2将
+其送到直连的Server0上，应答的数据包从Server0
+到达路由器R2后，因为没有到达目的网络192.168.1.0
+的路由表项，故而将其丢弃。
+
+步骤三 在R1上配置动态NAT
+（1）设置内部转换接口
+R1(config)#in f0/0
+R1(config-if)#ip nat inside 
+R1(config-if)#exit
+
+（2）设置外部转换接口
+R1(config)#in f0/1
+R1(config-if)#ip nat outside
+R1(config-if)#exit
+
+（3）定义ACL
+R1(config)#access-list 1 permit 192.168.1.0 0.0.0.255 
+
+（4）定义内部全局地址池
+R1(config)#ip nat pool jx 10.1.1.100 10.1.1.101 netmask 255.255.255.0
+
+（5）应用动态NAT
+R1(config)#ip nat inside source list 1 pool jx
+
+步骤四 验证PC和Server0的连通性
+（1）PC1ping100.1.1.2
+PC>ping 100.1.1.2    //通  
+（2）PC2ping100.1.1.2
+PC>ping 100.1.1.2    //通
+（3）PC2ping100.1.1.2
+ PC>ping 100.1.1.2  //不通
+（4）R1#sh ip nat tr
+
+R1#sh ip nat tr
+Pro  Inside global     Inside local       Outside local      Outside global
+icmp 10.1.1.100:115    192.168.1.1:115    100.1.1.2:115      100.1.1.2:115
+icmp 10.1.1.100:116    192.168.1.1:116    100.1.1.2:116      100.1.1.2:116
+icmp 10.1.1.100:117    192.168.1.1:117    100.1.1.2:117      100.1.1.2:117
+icmp 10.1.1.100:118    192.168.1.1:118    100.1.1.2:118      100.1.1.2:118
+icmp 10.1.1.101:29     192.168.1.2:29     100.1.1.2:29       100.1.1.2:29
+icmp 10.1.1.101:30     192.168.1.2:30     100.1.1.2:30       100.1.1.2:30
+icmp 10.1.1.101:31     192.168.1.2:31     100.1.1.2:31       100.1.1.2:31
+icmp 10.1.1.101:32     192.168.1.2:32     100.1.1.2:32       100.1.1.2:32
+分析：三台主机争取两个公邮IP，早到优先获得访问资格，可以用NAPT技术解决上述问题。
+
+步骤五 应用NAPT
+（1）撤销NAT
+R1(config)#no ip nat inside source list 1 
+（2）应用NAPT
+Router(config)#ip nat inside source list 1 pool jx overload 
+（3）验证PC和Server0的连通性
+（1）PC1ping100.1.1.2
+PC>ping 100.1.1.2    //通  
+（2）PC2ping100.1.1.2
+PC>ping 100.1.1.2    //通
+（3）PC2ping100.1.1.2
+ PC>ping 100.1.1.2  //通
+（4）观察NAT转化结果
+R1#sh ip nat tr
+结论：多台计算机共享少量公有IP接入公网，可有用NAPT技术分配不同的端口号加以区分各主机。由此可见overload//使(计算机)超载运行，十分重要！
+
+
+
