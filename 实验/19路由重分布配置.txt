@@ -1,0 +1,105 @@
+路由重分发命令行接口配置过程： 
+PC1
+IP: 1.1.1.2
+Submask: 255.255.255.0
+Gateway: 1.1.1.1
+PC2
+IP: 4.1.1.2
+Submask: 255.255.255.0
+Gateway: 4.1.1.1
+步骤一 IP地址配置
+R1 IP配置
+1.	Router>en 
+2.	Router#conf t
+3.	Router(config)ho  R1 //修改路由器名字与姓名关联
+4.	R1(config)#in f 0/0
+5.	R1(config-if)#ip ad 1.1.1.1 255.255.255.0
+6.	R1(config-if)#no sh 
+7.	R1(config-if)#exit
+8.	R1(config)#in f0/1
+9.	R1(config-if)#ip ad 2.1.1.1 255.255.255.0
+10.	R1(config-if)#no sh 
+11.	R1(config-if)#end
+12.	R1#sh ru  //查看IP配置
+
+R2 IP配置
+1.	Router>en 
+2.	Router#conf t
+3.	Router(config)ho  R2 //修改路由器名字与姓名关联
+4.	R2(config)#in f0/0
+5.	R2(config-if)#ip ad 2.1.1.2 255.255.255.0
+6.	R2(config-if)#no sh 
+7.	R2(config-if)#exit
+8.	R2(config)#in f0/1
+9.	R2(config-if)#ip address 3.1.1.1 255.255.255.0
+10.	R2(config-if)#no sh 
+11.	R2(config-if)#end
+12.	R2#sh ru  //查看IP配置
+
+R3 IP配置
+1.	Router#en
+2.	Router#conf t
+3.	Router(config)ho  R3  //修改路由器名字与学号尾数关联
+4.	R3(config)#in f0/0
+5.	R3(config-if)#ip ad 3.1.1.2 255.255.255.0
+6.	R3(config-if)# no sh 
+7.	R3(config-if)#exit
+8.	R3(config)#in f0/1
+9.	R3(config-if)#ip ad 4.1.1.1 255.255.255.0
+10.	R3(config-if)#no sh 
+11.	R3(config-if)#end
+12.	R3#sh ru  //查看IP配置
+
+步骤二 路由配置
+R1 路由配置
+1.	R1#conf t
+2.	R1(config)#router ospf 100 
+3.	R1(config-router)#network 1.1.1.0 0.0.0.255 area 0
+4.	R1(config-router)#network 2.1.1.0 0.0.0.255 area 0
+5.	R1(config-router)#end
+6.	R1#sh ip ro   //观察没有学习到3.1.1.0和4.1.1.0
+7.	R1#wr
+
+R2 路由配置
+1.	R2#conf t
+2.	R2(config)#router ospf 100
+3.	R2(config-router)#network 2.1.1.0 0.0.0.255 area 0//R2左边为OSPF，只宣告左边
+4.	R2(config-router)#exit
+5.	R2(config)#router rip  //开启Router RIP协议
+6.	R2(config-router)#network 3.1.1.0 //R2右边为RIP，只宣告右边 
+7.	R2(config-router)#version 2     //使用RIPv2版本的RIP
+8.	R2(config-router)#no auto-summary  //关闭了自动汇总
+9.	R2(config-router)#end
+10.	R2#sh ip ro
+11.	R2#wr
+
+R3 路由配置
+1.	R3#conf t
+2.	R3(config)#router rip  //开启Router RIP协议
+3.	R3(config-router)# network 3.1.1.0
+4.	R3(config-router)# network 4.1.1.0 
+5.	R3config-router)#version 2     //使用RIPv2版本的RIP
+6.	R3(config-router)#no auto-summary  //关闭了自动汇总
+7.	R3#sh ip ro  //观察没有学习到1.1.1.0和2.1.1.0
+8.	R3#wr
+?
+
+步骤三 在R2 配置路由重发布
+1.	R2#conf t
+2.	R2(config)#router ospf 100
+3.	R2(config-router)#redistribute rip subnets  //将RIP路由重发布进OSPF
+4.	R2(config-router)#exit
+5.	R2(config)#router rip
+6.	R2(config-router)#redistribute ospf 100 metric 2   //  将OSPF路由重发布进RIP，metric值默认为无穷大，此处指定为2
+7.	SW2(config-router)#end
+8.	R2#wr
+
+步骤四 查看路由表
+1.	R1#sh ip ro //观察学习到3.1.1.0和4.1.1.0
+2.	R3#sh ip ro//观察学习到1.1.1.0和2.1.1.0
+
+
+步骤五 实验验证
+PC1 Ping PC2  
+Ping 4.1.1.1    reply
+

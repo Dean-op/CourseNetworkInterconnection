@@ -1,0 +1,64 @@
+SW1ÅäÖÃ
+Switch>
+Switch>en
+Switch#vl da
+Switch(vlan)#vl 10      
+Switch(vlan)#vl 20
+Switch(vlan)#exit
+Switch#conf t
+Switch(config)#ho S1
+S1(config)#in f0/1
+S1(config-if)#sw mo ac
+S1(config-if)#sw ac vl 10
+S1(config-if)#exit
+S1(config)#in f0/2
+S1(config-if)#sw mo ac
+S1(config-if)#sw ac vl 20
+S1(config-if)#exit
+S1(config)#end
+S1#sh vl
+
+S1#conf t
+S1(config)#in ra g0/1-2
+S1(config-if-range)#channel-group 3 mode on
+S1(config-if-range)#exit
+S1config)#in port-channel 3
+S1(config-if)#sw mo tr
+S1(config-if)#sw tr al vl 10,20
+S1(config-if)#no sh
+S1(config-if)#end
+S1#sh ru
+S1#sh etherchannel summary 
+
+
+SW2ÅäÖÃ
+Switch>
+Switch>en
+Switch#vl da
+Switch(vlan)#vl 10
+Switch(vlan)#vl 20
+Switch(vlan)#exit
+Switch#conf t
+Switch(config)#ho S2
+S2(config)#in f0/1
+S2(config-if)#sw mo ac
+S2(config-if)#sw ac vl 10
+S2(config-if)#exit
+S2(config)#in f0/2
+S2(config-if)#sw mo ac
+S2(config-if)#sw ac vl 20
+S2(config-if)#exit
+S2(config)#end
+S2#sh vl
+
+S2#conf t
+S2(config)#in ra g0/1-2
+S2(config-if-range)#channel-group 3 mode on
+S2(config-if-range)#exit
+S2(config)#in port-channel 3
+S2(config-if)#sw mo tr
+S2(config-if)#sw tr al vl 10,20
+S2(config-if)#no sh
+S2(config-if)#end
+S2#sh ru
+S2#sh etherchannel summary 
