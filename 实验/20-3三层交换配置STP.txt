@@ -1,0 +1,62 @@
+三层交换配置STP
+步骤一：将四台交换机相连的端口配置为中继端口，分别创建vlan2
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#ho SW1
+SW1(config)#vl 2
+SW1(config-vlan)#exit
+SW1(config)#in ra f0/1-2
+SW1(config-if-range)#sw mo tr
+SW1(config-if-range)#end
+SW1#sh ru
+SW1#sh vl br
+
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#ho SW2
+SW2(config)#in ra f0/1-2
+SW2(config-if-range)#sw mo tr
+SW2(config-if-range)#end
+SW2#sh ru
+SW2#sh vl br
+
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#ho MSW1
+MSW1(config)#vl 2
+MSW1(config-vlan)#exit
+MSW1(config)#in ra f0/1-3
+MSW1(config-if-range)#sw tr encapsulation dot1q 
+MSW1(config-if-range)#sw mo tr
+MSW1(config-if-range)#end
+MSW1#sh ru
+MSW1#sh vl br
+
+Switch>
+Switch>en
+Switch#conf t
+Switch(config)#ho MSW2
+MSW2(config)#vl 2
+MSW2(config-vlan)#exit
+MSW2(config)#in ra f0/1-3
+MSW2(config-if-range)#sw tr en dot1q 
+MSW2(config-if-range)#sw mo tr
+MSW2(config-if-range)#end
+MSW2#sh ru
+MSW2#sh vl br
+
+步骤二：设置MSM1为vlan1的主根vlan2的次根，设置MSM2为vlan2的主根vlan1的次根并查看
+MSW1(config)#spanning-tree vl 1 root primary 
+MSW1(config)#spanning-tree vl 2 root secondary 
+MSW1(config)#end
+MSW1#sh spanning-tree 
+
+MSW2(config)#spanning-tree vl 2 root primary 
+MSW2(config)#spanning-tree vl 1 root secondary 
+MSW2(config)#end
+MSW2#sh spanning-tree
+                      
+
